@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SERPO FDS- Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }, colors: { brand: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 800: '#5b21b6', 900: '#4c1d95' } } } } }
+    </script>
+    <style>
+        body, html { margin: 0 !important; padding: 0 !important; overflow: hidden !important; background-color: #020617; }
+        .blog-pager, .header-widget, .sidebar, .footer, .post-title, .comments, #header, #footer { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .glass-dark { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #app-wrapper { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 0%, #1e293b, #020617); }
+        #app-container { width: 100%; height: 100%; max-width: 430px; background-color: #f8fafc; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        @media (min-width: 640px) { #app-container { height: 92vh; max-height: 890px; border-radius: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 8px solid #0f172a; } }
+    </style>
+</head>
+<body>
+    <div id="app-wrapper">
+        <div id="app-container">
+            
+            <!-- SCREEN LOGIN -->
+            <div id="screen-login" class="absolute inset-0 z-50 bg-slate-900 flex flex-col justify-center px-8 fade-in">
+                <div class="relative z-10 w-full glass-dark rounded-[32px] p-8 shadow-2xl border border-slate-700">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-700 rounded-[20px] mx-auto flex items-center justify-center mb-5 shadow-lg shadow-brand-600/40"><i data-lucide="network" class="w-8 h-8 text-white"></i></div>
+                        <h1 class="text-3xl font-extrabold text-white tracking-tight">SERPO<span class="text-brand-400">Flow</span></h1>
+                        <p class="text-[11px] text-brand-200 mt-1 uppercase tracking-widest font-semibold">Workspace</p>
+                    </div>
+
+                    <!-- FORM LOGIN -->
+                    <div class="space-y-4">
+                        <input type="text" id="username" class="w-full bg-slate-800/80 border border-slate-600 text-white text-sm rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand-400" placeholder="Username / ID">
+                        <input type="password" id="password" class="w-full bg-slate-800/80 border border-slate-600 text-white text-sm rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand-400" placeholder="Password">
+                        <button onclick="handleLogin()" id="btn-login" class="w-full bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold py-3.5 rounded-2xl active:scale-95 flex items-center justify-center gap-2 mt-2">
+                            <span>Masuk</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN DASHBOARD -->
+            <div id="screen-dashboard" class="hidden flex-1 flex-col overflow-y-auto no-scrollbar pb-24 bg-slate-50 fade-in">
+                <!-- Header -->
+                <div class="bg-gradient-to-br from-brand-900 via-brand-700 to-indigo-800 text-white px-6 pt-12 sm:pt-8 pb-16 rounded-b-[40px] shadow-lg relative">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center font-extrabold text-xl shadow-inner" id="user-initial">U</div>
+                            <div>
+                                <h2 class="font-bold text-lg tracking-wide leading-tight text-white" id="user-name">User</h2>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span id="user-role" class="bg-amber-400/20 text-amber-300 text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-amber-300/30 uppercase">ROLE</span>
+                                    <span class="text-[10px] text-brand-100 font-medium" id="user-basecamp">Basecamp</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="handleLogout()" class="w-10 h-10 bg-white/10 hover:bg-white/20 text-white active:scale-95 transition rounded-full flex items-center justify-center border border-white/10"><i data-lucide="power" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <!-- VIEW TIM LAPANGAN (TL) -->
+                <div id="tl-view" class="hidden">
+                    <div class="px-5 -mt-10 relative z-10 slide-up">
+                        <div class="glass-panel bg-white/90 rounded-[28px] p-5 shadow-xl shadow-slate-200/50">
+                            <div class="flex justify-between items-center mb-5 pb-4 border-b border-slate-100">
+                                <div>
+                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">Kas Ops Tim</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-sm font-bold text-slate-500">Rp</span><h1 id="tl-balance" class="text-3xl font-extrabold text-slate-800 tracking-tight">0</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-3">
+                                <button onclick="navTo('material')" class="flex flex-col items-center gap-1.5 group active:scale-95"><div class="w-12 h-12 rounded-[18px] bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="boxes" class="w-5 h-5"></i></div><span class="text-[10px] font-bold text-slate-600">Material</span></button>
+                                <button onclick="navTo('pakai')" class="flex flex-col items-center gap-1.5 group active:scale-95"><div class="w-12 h-12 rounded-[18px] bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="activity" class="w-5 h-5"></i></div><span class="text-[10px] font-bold text-slate-600">Log FO</span></button>
+                                <button onclick="navTo('tools')" class="flex flex-col items-center gap-1.5 group active:scale-95"><div class="w-12 h-12 rounded-[18px] bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="wrench" class="w-5 h-5"></i></div><span class="text-[10px] font-bold text-slate-600">Alat</span></button>
+                                <button onclick="navTo('kas')" class="flex flex-col items-center gap-1.5 group active:scale-95"><div class="w-12 h-12 rounded-[18px] bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="wallet" class="w-5 h-5"></i></div><span class="text-[10px] font-bold text-slate-600">Finance</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-5 mt-6 grid grid-cols-2 gap-3 slide-up" style="animation-delay: 0.1s;">
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center"><i data-lucide="route" class="w-5 h-5"></i></div><div><p class="text-[10px] text-slate-400 font-bold uppercase">Stok Tim</p><p class="text-sm font-extrabold text-slate-800"><span id="tl-stock">0</span> M</p></div></div>
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="check-circle" class="w-5 h-5"></i></div><div><p class="text-[10px] text-slate-400 font-bold uppercase">Status Tim</p><p class="text-sm font-extrabold text-slate-800">On Duty</p></div></div>
+                    </div>
+                </div>
+
+                <!-- VIEW ADMIN PUSAT (GLOBAL) -->
+                <div id="admin-view" class="hidden">
+                    <div class="px-5 -mt-10 relative z-10 slide-up">
+                        <div class="glass-panel bg-white/90 rounded-[28px] p-5 shadow-xl shadow-slate-200/50">
+                            <h3 class="text-[10px] font-extrabold text-brand-600 uppercase tracking-widest block mb-4 flex items-center gap-1.5"><i data-lucide="globe" class="w-3.5 h-3.5"></i> Executive Dashboard</h3>
+                            <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-100">
+                                <div><span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Total Kas Global</span><div class="flex items-baseline gap-1"><span class="text-xs font-bold text-slate-500">Rp</span><h1 id="admin-global-balance" class="text-2xl font-extrabold text-slate-800 tracking-tight">0</h1></div></div>
+                                <div class="pl-4 border-l border-slate-100"><span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Total Material (M)</span><div class="flex items-baseline gap-1"><h1 id="admin-global-stock" class="text-2xl font-extrabold text-brand-600 tracking-tight">0</h1></div></div>
+                            </div>
+                            <div class="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1">
+                                <button onclick="navTo('kas')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold flex items-center gap-1 flex-shrink-0 active:scale-95"><i data-lucide="wallet" class="w-3.5 h-3.5"></i> Cek Kas</button>
+                                <button onclick="navTo('material')" class="px-3 py-1.5 bg-brand-50 text-brand-700 rounded-full text-[10px] font-bold flex items-center gap-1 flex-shrink-0 active:scale-95"><i data-lucide="boxes" class="w-3.5 h-3.5"></i> Cek Stok</button>
+                                <button onclick="navTo('pakai')" class="px-3 py-1.5 bg-rose-50 text-rose-700 rounded-full text-[10px] font-bold flex items-center gap-1 flex-shrink-0 active:scale-95"><i data-lucide="activity" class="w-3.5 h-3.5"></i> Cek Log FO</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-5 mt-6 pb-6 slide-up" style="animation-delay: 0.2s;">
+                        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-1.5"><i data-lucide="layout-grid" class="w-4 h-4 text-brand-600"></i> Rincian Per Area (Zona)</h3>
+                        <div id="admin-zone-list" class="grid grid-cols-1 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN CRUD & MODAL FORM -->
+            <div id="screen-crud" class="hidden flex-1 flex-col bg-slate-50 h-full relative fade-in">
+                <div class="bg-white px-4 pt-12 sm:pt-8 pb-4 flex justify-between items-center shadow-sm border-b border-slate-100 relative z-10"><button onclick="navTo('dashboard')" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-slate-100"><i data-lucide="arrow-left" class="w-5 h-5"></i></button><h3 id="crud-title" class="font-bold text-slate-800 text-lg">Modul</h3><button onclick="openFormModal()" class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 hover:bg-brand-100"><i data-lucide="plus" class="w-5 h-5"></i></button></div>
+                <div class="flex-1 overflow-y-auto p-5 pb-24 space-y-3" id="crud-list"></div>
+            </div>
+            
+            <div id="bottom-nav" class="hidden absolute bottom-0 left-0 right-0 glass-panel bg-white/90 border-t border-slate-200 px-6 py-3.5 flex justify-between items-center z-40">
+                <button id="nav-dashboard" onclick="navTo('dashboard')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-bold">Home</span></button>
+                <button id="nav-material" onclick="navTo('material')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="boxes" class="w-5 h-5"></i><span class="text-[9px] font-bold">Stok</span></button>
+                <div class="relative -mt-10"><button onclick="openFormModal()" class="w-14 h-14 bg-brand-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-brand-600/40 border-[4px] border-slate-50"><i data-lucide="plus" class="w-6 h-6"></i></button></div>
+                <button id="nav-tools" onclick="navTo('tools')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="wrench" class="w-5 h-5"></i><span class="text-[9px] font-bold">Tools</span></button>
+                <button id="nav-kas" onclick="navTo('kas')" class="nav-btn flex flex-col items-center gap-1 text-slate-400"><i data-lucide="wallet" class="w-5 h-5"></i><span class="text-[9px] font-bold">Kas</span></button>
+            </div>
+
+            <div id="modal-form" class="hidden absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end justify-center transition-opacity">
+                <div class="bg-white w-full rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
+                    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+                    <div class="flex justify-between items-center mb-4"><h3 id="form-title" class="text-lg font-extrabold text-slate-800">Tambah Data</h3><button onclick="closeFormModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+                    <form id="dynamic-form" class="space-y-3 mb-6" onsubmit="saveData(event)">
+                        <input type="hidden" id="form-id" value="">
+                        <div id="form-fields"></div>
+                        <button type="submit" id="btn-save" class="w-full mt-4 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-2xl flex justify-center items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Data</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIKA UTAMA -->
+    <script type="module">
+        const IS_PREVIEW = false; // UBAH MENJADI false SAAT SUDAH TERHUBUNG GOOGLE SHEETS
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyzq05JrnxP6KMQZEiREnPeQeb4Aw8h4Ou_brwtdk84-XOC-OYPN1hQ_KwE_EaUq4H0Vw/exec";
+
+        let currentUser = null;
+        let activeModule = 'dashboard'; 
+        let db = { kas: [], material: [], tools: [], pakai: [] };
+
+        if(IS_PREVIEW){
+            db = {
+                users: {
+                    "admin": { password: "admin2026", data: { nama: "Admin Pusat", role: "Admin Pusat", basecamp: "Head Office" } },
+                    "serpoidi": { password: "TL", data: { nama: "Arif", role: "TL Lapangan", basecamp: "BC IDI" } }
+                },
+                kas: [{ id: 1, jenis: 'Keluar', kat: 'BBM Ops', nom: 250000, ket: 'TT 8812', inputBy: 'Arif (BC IDI)' }],
+                material: [{ id: 1, nama: 'Dropwire 1C', kat: 'Kabel', stok: 450, sat: 'Meter', inputBy: 'Arif (BC IDI)' }],
+                tools: [], pakai: []
+            };
+        }
+
+        const formConfigs = {
+            kas: [{ id: 'jenis', label: 'Tipe', type: 'select', opts: ['Masuk', 'Keluar'] }, { id: 'kat', label: 'Kategori', type: 'text' }, { id: 'nom', label: 'Nominal (Rp)', type: 'number' }, { id: 'ket', label: 'Keterangan', type: 'text' }],
+            material: [{ id: 'nama', label: 'Nama Material', type: 'text' }, { id: 'kat', label: 'Kategori', type: 'select', opts: ['Kabel', 'Aksesoris'] }, { id: 'stok', label: 'Jumlah Stok', type: 'number' }, { id: 'sat', label: 'Satuan', type: 'select', opts: ['Meter', 'Unit'] }],
+            tools: [{ id: 'nama', label: 'Nama Alat', type: 'text' }, { id: 'sn', label: 'Serial Number', type: 'text' }, { id: 'kond', label: 'Kondisi', type: 'select', opts: ['Ready', 'Kalibrasi', 'Rusak'] }],
+            pakai: [{ id: 'no_tt', label: 'Nomor Ticket (TT)', type: 'text' }, { id: 'mat', label: 'Nama Material', type: 'text' }, { id: 'jml', label: 'Jumlah Terpakai', type: 'number' }, { id: 'sat', label: 'Satuan', type: 'text' }]
+        };
+        const moduleTitles = { kas: 'Kas Operasional', material: 'Stok Material', tools: 'Manajemen Alat', pakai: 'Log Pemakaian' };
+
+        document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+
+        // FUNGSI LOGIN SUPER AMAN
+        window.handleLogin = async () => {
+            try {
+                const uInput = document.getElementById('username');
+                const pInput = document.getElementById('password');
+                const btn = document.getElementById('btn-login');
+
+                if (!uInput || !pInput || !btn) {
+                    alert("Error: Elemen ID form login tidak ditemukan di HTML Anda.");
+                    return;
+                }
+
+                const u = uInput.value.trim();
+                const p = pInput.value.trim();
+
+                if(!u || !p) {
+                    alert("Harap isi username dan password!");
+                    return;
+                }
+
+                btn.innerHTML = 'Loading...';
+
+                if(IS_PREVIEW) {
+                    setTimeout(() => {
+                        const userKey = u.toLowerCase();
+                        if(db.users[userKey] && db.users[userKey].password === p) {
+                            currentUser = db.users[userKey].data;
+                            setupDashboard();
+                        } else { 
+                            alert("Login Gagal. Username/Password salah."); 
+                            btn.innerHTML = 'Masuk'; 
+                        }
+                    }, 500);
+                } else {
+                    const res = await fetch(GAS_URL + "?action=login", { method: 'POST', body: JSON.stringify({username: u, password: p})});
+                    const data = await res.json();
+                    if(data.success) { 
+                        currentUser = data.data; 
+                        db = data.db || { kas: [], material: [], tools: [], pakai: [] }; 
+                        setupDashboard(); 
+                    } else { 
+                        alert(data.msg); 
+                        btn.innerHTML = 'Masuk'; 
+                    }
+                }
+            } catch (err) {
+                alert("Sistem Error: " + err.message);
+                const btn = document.getElementById('btn-login');
+                if (btn) btn.innerHTML = 'Masuk';
+            }
+        };
+
+        window.handleLogout = () => location.reload();
+
+        // SETUP VIEW BERDASARKAN ROLE
+        function setupDashboard() {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-dashboard').classList.remove('hidden');
+            document.getElementById('screen-dashboard').classList.add('flex');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('bottom-nav').classList.add('flex');
+            
+            document.getElementById('user-name').innerText = currentUser.nama || "User";
+            document.getElementById('user-role').innerText = currentUser.role || "TL";
+            document.getElementById('user-basecamp').innerText = currentUser.basecamp || "Unknown";
+            document.getElementById('user-initial').innerText = (currentUser.nama ? currentUser.nama.charAt(0) : "U").toUpperCase();
+            
+            // Deteksi Role Admin yang kebal huruf besar/kecil
+            const roleStr = (currentUser.role || "").toLowerCase();
+            const isAdmin = roleStr.includes('admin');
+            
+            if (isAdmin) {
+                document.getElementById('tl-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                document.getElementById('admin-view').classList.add('hidden');
+                document.getElementById('tl-view').classList.remove('hidden');
+                renderTLDashboard();
+            }
+        }
+
+        // RENDER METRIK TL
+        function renderTLDashboard() {
+            const userKas = db.kas.filter(k => k.inputBy && k.inputBy.includes(currentUser.basecamp));
+            const userMat = db.material.filter(m => m.inputBy && m.inputBy.includes(currentUser.basecamp));
+            
+            const saldo = userKas.reduce((acc, curr) => curr.jenis === 'Masuk' ? acc + Number(curr.nom) : acc - Number(curr.nom), 0);
+            const stok = userMat.reduce((acc, curr) => curr.sat === 'Meter' ? acc + Number(curr.stok) : acc, 0);
+            
+            document.getElementById('tl-balance').innerText = saldo.toLocaleString('id-ID');
+            document.getElementById('tl-stock').innerText = stok.toLocaleString('id-ID');
+        }
+
+        // RENDER METRIK ADMIN
+        function renderAdminDashboard() {
+            const globalSaldo = db.kas.reduce((acc, curr) => curr.jenis === 'Masuk' ? acc + Number(curr.nom) : acc - Number(curr.nom), 0);
+            const globalStok = db.material.reduce((acc, curr) => curr.sat === 'Meter' ? acc + Number(curr.stok) : acc, 0);
+            document.getElementById('admin-global-balance').innerText = globalSaldo.toLocaleString('id-ID');
+            document.getElementById('admin-global-stock').innerText = globalStok.toLocaleString('id-ID');
+
+            const container = document.getElementById('admin-zone-list');
+            let zones = {};
+            
+            const extractZone = (item) => {
+                if(!item.inputBy) return 'Pusat';
+                const match = item.inputBy.match(/\((.*?)\)/);
+                return match ? match[1] : 'Pusat';
+            };
+
+            db.kas.forEach(k => { const bc = extractZone(k); if(!zones[bc]) zones[bc] = { saldo: 0, opsKeluar: 0, sisaStok: 0, FOterpakai: 0 }; if(k.jenis === 'Masuk') zones[bc].saldo += Number(k.nom); if(k.jenis === 'Keluar') { zones[bc].saldo -= Number(k.nom); zones[bc].opsKeluar += Number(k.nom); } });
+            db.material.forEach(m => { const bc = extractZone(m); if(!zones[bc]) zones[bc] = { saldo: 0, opsKeluar: 0, sisaStok: 0, FOterpakai: 0 }; if(m.sat === 'Meter') zones[bc].sisaStok += Number(m.stok); });
+            db.pakai.forEach(p => { const bc = extractZone(p); if(!zones[bc]) zones[bc] = { saldo: 0, opsKeluar: 0, sisaStok: 0, FOterpakai: 0 }; zones[bc].FOterpakai += Number(p.jml); });
+
+            const zoneKeys = Object.keys(zones).filter(z => z !== 'Head Office' && z !== 'Pusat');
+            if(zoneKeys.length === 0) { container.innerHTML = '<p class="text-xs text-slate-400">Belum ada aktivitas zona.</p>'; return; }
+
+            container.innerHTML = zoneKeys.map(bc => `
+                <div class="bg-white rounded-[20px] p-4 shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-extrabold text-[10px] border border-brand-100">${bc.replace('BC ','').substring(0,2).toUpperCase()}</div>
+                            <p class="text-xs font-bold text-slate-800">${bc}</p>
+                        </div>
+                        <div class="text-right"><p class="text-[9px] font-bold text-slate-400 uppercase">Sisa Saldo Kas</p><p class="text-xs font-extrabold text-emerald-600">Rp ${zones[bc].saldo.toLocaleString('id-ID')}</p></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                        <div><p class="text-[9px] font-bold text-slate-400 uppercase">Ops Keluar</p><p class="text-[11px] font-bold text-rose-600">Rp ${zones[bc].opsKeluar.toLocaleString('id-ID')}</p></div>
+                        <div class="border-l border-slate-100"><p class="text-[9px] font-bold text-slate-400 uppercase">Stok (M)</p><p class="text-[11px] font-bold text-slate-700">${zones[bc].sisaStok}</p></div>
+                        <div class="border-l border-slate-100"><p class="text-[9px] font-bold text-slate-400 uppercase">Terpakai</p><p class="text-[11px] font-bold text-brand-600">${zones[bc].FOterpakai}</p></div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.navTo = (module) => {
+            activeModule = module;
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-brand-600'); b.classList.add('text-slate-400'); });
+            if(module !== 'pakai' && document.getElementById('nav-' + module)) { document.getElementById('nav-' + module).classList.remove('text-slate-400'); document.getElementById('nav-' + module).classList.add('text-brand-600'); }
+
+            if(module === 'dashboard') {
+                const roleStr = (currentUser.role || "").toLowerCase();
+                if (roleStr.includes('admin')) renderAdminDashboard(); else renderTLDashboard();
+                
+                document.getElementById('screen-crud').classList.add('hidden');
+                document.getElementById('screen-dashboard').classList.remove('hidden');
+                document.getElementById('screen-dashboard').classList.add('flex');
+            } else {
+                document.getElementById('screen-dashboard').classList.add('hidden');
+                document.getElementById('screen-crud').classList.remove('hidden');
+                document.getElementById('screen-crud').classList.add('flex');
+                document.getElementById('crud-title').innerText = moduleTitles[module];
+                renderCRUDList();
+            }
+        };
+
+        // CRUD LIST PER ROLE
+        function renderCRUDList() {
+            const list = document.getElementById('crud-list');
+            let data = db[activeModule] || [];
+            const roleStr = (currentUser.role || "").toLowerCase();
+            
+            if (!roleStr.includes('admin')) {
+                data = data.filter(item => item.inputBy && item.inputBy.includes(currentUser.basecamp));
+            }
+            
+            list.innerHTML = '';
+            if(data.length === 0) { list.innerHTML = `<div class="text-center text-slate-400 mt-10 text-xs">Belum ada data.</div>`; return; }
+
+            data.forEach(item => {
+                let icon = 'file-text', title = '', sub = '', badge = '';
+                if(activeModule === 'kas') { icon = item.jenis === 'Masuk' ? 'arrow-down-left' : 'arrow-up-right'; title = item.kat; sub = `Rp ${Number(item.nom).toLocaleString('id-ID')} • ${item.ket}`; badge = `<span class="text-[9px] font-bold px-2 py-1 rounded-md ${item.jenis==='Masuk'?'bg-emerald-100 text-emerald-700':'bg-rose-100 text-rose-700'}">${item.jenis}</span>`; }
+                else if(activeModule === 'material') { icon = 'box'; title = item.nama; sub = `${item.kat}`; badge = `<span class="font-extrabold text-slate-700 text-xs">${item.stok} ${item.sat}</span>`; }
+                else if(activeModule === 'tools') { icon = 'wrench'; title = item.nama; sub = `SN: ${item.sn}`; let bCol = item.kond==='Ready'?'emerald':(item.kond==='Rusak'?'rose':'amber'); badge = `<span class="text-[9px] font-bold px-2 py-1 rounded-md bg-${bCol}-100 text-${bCol}-700">${item.kond}</span>`; }
+                else if(activeModule === 'pakai') { icon = 'activity'; title = item.no_tt; sub = item.mat; badge = `<span class="font-bold text-rose-600 text-xs">-${item.jml} ${item.sat}</span>`; }
+
+                const adminBadge = roleStr.includes('admin') && item.inputBy ? `<p class="text-[9px] text-brand-600 font-bold mt-1.5 bg-brand-50 inline-block px-1.5 py-0.5 rounded border border-brand-100"><i data-lucide="user" class="w-2.5 h-2.5 inline"></i> ${item.inputBy}</p>` : '';
+
+                list.innerHTML += `
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex justify-between items-center slide-up">
+                        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-100"><i data-lucide="${icon}" class="w-5 h-5"></i></div><div><p class="text-xs font-bold text-slate-800">${title}</p><p class="text-[10px] text-slate-500 mt-0.5">${sub}</p>${adminBadge}</div></div>
+                        <div class="flex flex-col items-end gap-2">${badge}<div class="flex gap-1"><button onclick="deleteItem(${item.id})" class="w-6 h-6 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div></div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        window.openFormModal = () => {
+            const m = activeModule === 'dashboard' ? 'material' : activeModule; 
+            document.getElementById('form-fields').innerHTML = formConfigs[m].map(c => c.type === 'select' ? `<div><label class="text-[10px] font-bold text-slate-500 block mb-1">${c.label}</label><select id="f_${c.id}" class="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50 font-semibold focus:ring-1 focus:ring-brand-500">${c.opts.map(o => `<option value="${o}">${o}</option>`).join('')}</select></div>` : `<div><label class="text-[10px] font-bold text-slate-500 block mb-1">${c.label}</label><input type="${c.type}" id="f_${c.id}" class="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500" required></div>`).join('');
+            document.getElementById('modal-form').classList.remove('hidden');
+        };
+
+        window.closeFormModal = () => document.getElementById('modal-form').classList.add('hidden');
+
+        window.deleteItem = async (id) => {
+            if(!confirm('Hapus data ini?')) return;
+            if(!IS_PREVIEW) await fetch(GAS_URL + "?action=crud", { method: 'POST', body: JSON.stringify({ module: activeModule, method: 'DELETE', id: id }) });
+            db[activeModule] = db[activeModule].filter(i => i.id !== id);
+            renderCRUDList();
+        };
+
+        window.saveData = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save'); btn.innerHTML = 'Menyimpan...';
+            let payload = { id: Date.now(), inputBy: currentUser.nama + " (" + currentUser.basecamp + ")" };
+            formConfigs[activeModule].forEach(c => payload[c.id] = document.getElementById(`f_${c.id}`).value);
+
+            if(!IS_PREVIEW) {
+                await fetch(GAS_URL + "?action=crud", { method: 'POST', body: JSON.stringify({ module: activeModule, method: 'CREATE', data: payload, user: currentUser }) });
+            }
+            
+            db[activeModule].push(payload);
+            closeFormModal(); 
+            renderCRUDList();
+            btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Simpan Data'; 
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
